@@ -1,0 +1,55 @@
+version: "2.1"
+services:
+  wireguard:
+    # See:
+    # * https://hub.docker.com/r/linuxserver/wireguard
+    # * https://github.com/linuxserver/docker-wireguard/blob/master/README.md
+    # * https://hub.docker.com/r/linuxserver/wireguard/tags
+    image: linuxserver/wireguard:latest
+    container_name: wireguard
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/London
+      # The hostname under which the server is reachable from the outside. This
+      # value is used when the generating client configuration files.
+      - SERVERURL=mydomain.com
+      # The number of peers (i.e. client devices) accepted by this server. Note that
+      # each client must have its own configuration (or: two devives can't connect to
+      # the same server at the same time if they have the same peer configuration; reason:
+      # they would end up with the same IP address)
+      # NOTE: This variable must be set to make the container run Wireguard in server mode!
+      - PEERS=2
+      # Which IP addresses are allowed to be routed through wireguard.
+      - ALLOWEDIPS=192.168.178.0/24
+      # DNS server on the server side. Must be inside the "ALLOWEDIPS" range.
+      # The value after the comma is the DNS suffix for DNS queries.
+      - PEERDNS=192.168.178.1, fritz.box
+      # If this is set to "true" (the default), the container will print a QR code
+      # for each client (peer) into its logs. These QR codes (most likely) contains
+      # the private keys for each client; so for security reasons (log leaking), we
+      # don't do this.
+      # Also, the QR code seems to be completely useless for non-mobile clients (i.e.
+      # Windows, macOS) and in this case we need to get the configuration to the client
+      # in another way (opening the peer.config file) anyways. Also, the QR code is stored
+      # on disk so it can later be retreived from there as well.
+      - LOG_CONFS=false
+    volumes:
+      # Contains the state of this container (generated keys, generated configs).
+      # Secure it on the host via: chmod -R go= data
+      - ./data:/config
+      # The Kernel modules
+      # This volume is only needed if the host's kernel has no Wireguard module included.
+      # In this case, the container builds it and places it in this directory - which requires
+      # write access. But of the host runs a modern kernels, this volume is not needed.
+      # You can see that the compilation is skipped in the logs:
+      #   It seems the wireguard module is already active. Skipping kernel header install and module compilation.
+      #- /lib/modules:/lib/modules
+    ports:
+      - 51820:51820/udp
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+    restart: unless-stopped
