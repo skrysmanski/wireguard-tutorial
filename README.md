@@ -8,9 +8,9 @@ This tutorial aims to fix this by providing simple steps to create your own VPN.
 
 ## What you get?
 
-When you finish this tutorial, you'll be able to securely connect your notebooks/smartphones/... from anywhere in the world to your home network. 
+When you finish this tutorial, you'll be able to securely connect your notebooks/smartphones/... from anywhere in the world to your home network.
 
-With this, you'll be able access any devices on your home network, like your NAS or your Raspberry Pi. 
+With this, you'll be able access any devices on your home network, like your NAS or your Raspberry Pi.
 
 You'll also get working DNS resolution for your devices (i.e. call your devices by name rather than by IP address), if your home network's router supports this.
 
@@ -150,3 +150,33 @@ Reply from XXXX:XXXX:XXXX:XXXX:XXXX:72c7:4ecc:2002: time=16ms
 So in my case (where the IP address of my router is `192.168.178.1`), I set the `PEERDNS` variable to:
 
     PEERDNS=192.168.178.1, fritz.box
+
+## mDNS/Bonjour/`.local`
+
+mDNS (also known as Bonjour or the `.local` domain) doesn't work with Wireguard.
+
+## (No) DNS name leaking
+
+If you're connected to your home network via WireGuard, your device now has (at least) two different DNS servers available:
+
+1. the one from your regular internet connection
+1. the one from your VPN connection
+
+So, if I type `ping servername`, which DNS server is asked to for the IP address of `servername`?
+
+If the first is asked, then I've now "leaked" the name of my server to this DNS server. It'll probably not do anything with this information and it'll probably don't have an answer - but from a privacy standpoint this would be less than optimal.
+
+Fortunately, at least on Windows (and probably also on the other operating systems, where possible), Wireguard configures the VPN in a way that the DNS server from the VPN connection is asked *first*.
+
+For Windows, [this answer](https://serverfault.com/a/1010660/71268) provides the technical background. It also provides a PowerShell command to check for the priority used for the WireGuard VPN tunnel - which was 5 in my case (which is the value you/I want).
+
+I assume that similar techniques exist for all other operating systems and that WireGuard uses them.
+
+## Some further information
+
+Here are some links to topics related to WireGuard that you may find worth reading:
+
+* [Question regarding preshared keys - do you guys use it? What is the main purpose?](https://www.reddit.com/r/WireGuard/comments/arixzo/comment/egnslfl/)
+* [WireGuard Endpoints and IP Addresses](https://www.procustodibus.com/blog/2021/01/wireguard-endpoints-and-ip-addresses/)
+* [GitHub repo for the Wireguard container](https://github.com/linuxserver/docker-wireguard)
+* [Some (incomplete/outdated) information about the WireGuard configuration](https://manpages.debian.org/unstable/wireguard-tools/wg.8.en.html#CONFIGURATION_FILE_FORMAT)
