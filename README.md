@@ -105,6 +105,22 @@ In the big text box, drop the contents from the `peerX.conf` file for that clien
 
 That's it.
 
+### macOS
+
+In the macOS client, click **Add Tunnel**, then **Add Empty Tunnel** (or hit <kbd>Cmd+N</kbd>).
+
+![Add empty tunnel](images/macos-add-empty-tunnel.png)
+
+For **Name** it seems to be customary to use `wg0`.
+
+For **On-Demand** don't check any of the checkboxes (not sure what they actually do).
+
+In the big text box, drop the contents from the `peerX.conf` file for that client.
+
+Then, after saving, you can activate the VPN tunnel via the menu bar:
+
+![Connect](images/macos-activate-connection.png)
+
 ## Determining your DNS suffix
 
 While in your home network, if `ping <servername>` works (from a device other than the server itself), you'll likely have a DNS suffix provided by your home network router.
